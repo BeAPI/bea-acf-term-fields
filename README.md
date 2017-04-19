@@ -14,7 +14,7 @@ add_action( 'init',  'init_taxonomies_fields', 11 );
  * @author BeAPI
  */
 public function init_taxonomies_fields() {
-	BEA_ACF_Terms_Fields::get_instance()
+	BEA_ACF_Term_Fields::get_instance()
 		->add_taxonomy( 'post_tag' )
 		->add_taxonomy( 'category' );
 }

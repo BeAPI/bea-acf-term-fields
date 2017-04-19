@@ -1,7 +1,7 @@
 <?php
 /*
  Plugin Name: BEA ACF terms fields
- Version: 1.1.0
+ Version: 1.1.1
  Plugin URI: https://github.com/BeAPI/bea-acf-term-fields
  Description: Simple class for adding the ACF values to the term object automatically
  Author: BeAPI
@@ -236,7 +236,7 @@ class BEA_ACF_Term_Fields {
 			return $terms;
 		}
 
-		if( $args['fields'] == 'all' ) {
+		if( isset( $args['fields'] ) && 'all' == $args['fields'] ) {
 			foreach( $terms as &$term ) {
 				if( !$this->is_taxonomy( $term->taxonomy ) ) {
 					continue;
