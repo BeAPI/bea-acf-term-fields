@@ -18,3 +18,17 @@ public function init_taxonomies_fields() {
 		->add_taxonomy( 'post_tag' )
 		->add_taxonomy( 'category' );
 }
+
+
+## Changelog ##
+
+### 1.1.2
+* 02 May 2017
+* Fix fatal error on empty field name
+
+### 1.1.1
+* 19 Apr 2017
+* Fix admin notice
+
+### 1.0.0
+* Initial Release

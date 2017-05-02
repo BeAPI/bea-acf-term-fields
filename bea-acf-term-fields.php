@@ -1,7 +1,8 @@
 <?php
+
 /*
  Plugin Name: BEA ACF terms fields
- Version: 1.1.1
+ Version: 1.1.2
  Plugin URI: https://github.com/BeAPI/bea-acf-term-fields
  Description: Simple class for adding the ACF values to the term object automatically
  Author: BeAPI
@@ -77,29 +78,29 @@ class BEA_ACF_Term_Fields {
 	 * @author Nicolas Juen
 	 */
 	private function get_fields() {
-		if( !is_null( $this->fields ) ) {
+		if ( ! is_null( $this->fields ) ) {
 			return $this->fields;
 		}
 
 		// Empty the fields on the taxonomies
-		if( empty( $this->taxonomies ) ) {
+		if ( empty( $this->taxonomies ) ) {
 			$this->fields = null;
 		}
 
-		foreach( $this->taxonomies as $taxonomy_name => $taxonomy ) {
+		foreach ( $this->taxonomies as $taxonomy_name => $taxonomy ) {
 			$groups = acf_get_field_groups( array( 'taxonomy' => $taxonomy_name ) );
 
-			if( empty( $groups ) ) {
+			if ( empty( $groups ) ) {
 				continue;
 			}
 
 			$fields = array();
-			foreach( $groups as $group ) {
+			foreach ( $groups as $group ) {
 				$fields += acf_get_fields( $group );
 			}
 
-			foreach( $fields as $field ) {
-				$this->fields[$taxonomy_name][$field['name']] = $field['key'];
+			foreach ( $fields as $field ) {
+				$this->fields[ $taxonomy_name ][ $field['name'] ] = $field['key'];
 			}
 		}
 
@@ -115,13 +116,13 @@ class BEA_ACF_Term_Fields {
 	 * @author Nicolas Juen
 	 */
 	private function get_taxonomy_fields( $taxonomy ) {
-		if( !$this->is_taxonomy( $taxonomy ) ) {
+		if ( ! $this->is_taxonomy( $taxonomy ) ) {
 			return array();
 		}
 
 		$fields = $this->get_fields();
 
-		return isset( $fields[$taxonomy] ) && !empty( $fields[$taxonomy] ) ? $fields[$taxonomy] : array() ;
+		return isset( $fields[ $taxonomy ] ) && ! empty( $fields[ $taxonomy ] ) ? $fields[ $taxonomy ] : array();
 	}
 
 	/**
@@ -133,13 +134,13 @@ class BEA_ACF_Term_Fields {
 	 * @author Nicolas Juen
 	 */
 	public function add_taxonomy( $taxonomy ) {
-		if( !taxonomy_exists( $taxonomy ) ) {
+		if ( ! taxonomy_exists( $taxonomy ) ) {
 			return $this;
 		}
 
 		// Empty the fields on taxonomy added
-		$this->fields = null;
-		$this->taxonomies[$taxonomy] = get_taxonomy( $taxonomy );
+		$this->fields                  = null;
+		$this->taxonomies[ $taxonomy ] = get_taxonomy( $taxonomy );
 
 		return $this;
 	}
@@ -151,7 +152,7 @@ class BEA_ACF_Term_Fields {
 	 * @author Nicolas Juen
 	 */
 	public function have_taxonomies() {
-		return !empty( $this->taxonomies );
+		return ! empty( $this->taxonomies );
 	}
 
 	/**
@@ -163,12 +164,12 @@ class BEA_ACF_Term_Fields {
 	 * @author Nicolas Juen
 	 */
 	public function is_taxonomy( $taxonomy ) {
-		if( !is_array( $taxonomy ) ) {
+		if ( ! is_array( $taxonomy ) ) {
 			$taxonomy = explode( ', ', str_replace( "'", "", $taxonomy ) );
 		}
 
-		foreach( $taxonomy as $tax ) {
-			if( isset( $this->taxonomies[$tax] ) ) {
+		foreach ( $taxonomy as $tax ) {
+			if ( isset( $this->taxonomies[ $tax ] ) ) {
 				return true;
 			}
 		}
@@ -185,7 +186,7 @@ class BEA_ACF_Term_Fields {
 	 * @author Nicolas Juen
 	 */
 	public function add_terms_get_terms( $terms, $taxonomies, $args ) {
-		if( is_wp_error( $terms ) || !$this->is_taxonomy( $taxonomies ) ) {
+		if ( is_wp_error( $terms ) || ! $this->is_taxonomy( $taxonomies ) ) {
 			return $terms;
 		}
 
@@ -200,7 +201,7 @@ class BEA_ACF_Term_Fields {
 	 */
 	public function add_term( $term ) {
 
-		if( is_wp_error( $term ) || !$this->is_taxonomy( $term->taxonomy ) ) {
+		if ( is_wp_error( $term ) || ! $this->is_taxonomy( $term->taxonomy ) ) {
 			return $term;
 		}
 
@@ -208,14 +209,17 @@ class BEA_ACF_Term_Fields {
 		$fields = $this->get_taxonomy_fields( $term->taxonomy );
 
 		// Check there is fields
-		if( empty( $fields ) ) {
+		if ( empty( $fields ) ) {
 			return $term;
 		}
 
 		/**
 		 * Get all the fields for the term of the taxonomy
 		 */
-		foreach( $fields as $field_name => $field_key ) {
+		foreach ( $fields as $field_name => $field_key ) {
+			if ( empty( $field_name ) ) {
+				continue;
+			}
 			$term->{$field_name} = get_field( $field_key, $term );
 		}
 
@@ -232,13 +236,13 @@ class BEA_ACF_Term_Fields {
 	 * @author Nicolas Juen
 	 */
 	public function add_terms( $terms, $objects, $taxonomies, $args ) {
-		if( is_wp_error( $terms ) || !$this->is_taxonomy( $taxonomies ) ) {
+		if ( is_wp_error( $terms ) || ! $this->is_taxonomy( $taxonomies ) ) {
 			return $terms;
 		}
 
-		if( isset( $args['fields'] ) && 'all' == $args['fields'] ) {
-			foreach( $terms as &$term ) {
-				if( !$this->is_taxonomy( $term->taxonomy ) ) {
+		if ( isset( $args['fields'] ) && 'all' == $args['fields'] ) {
+			foreach ( $terms as &$term ) {
+				if ( ! $this->is_taxonomy( $term->taxonomy ) ) {
 					continue;
 				}
 				$term = $this->add_term( $term );
@@ -256,17 +260,18 @@ class BEA_ACF_Term_Fields {
 	 */
 	public function add_terms_get_the_terms( $terms ) {
 
-		if( is_wp_error( $terms ) || !$this->have_taxonomies() ) {
+		if ( is_wp_error( $terms ) || ! $this->have_taxonomies() ) {
 			return $terms;
 		}
 
-		foreach( $terms as &$term ) {
-			if( !$this->is_taxonomy( $term->taxonomy ) ) {
+		foreach ( $terms as &$term ) {
+			if ( ! $this->is_taxonomy( $term->taxonomy ) ) {
 				continue;
 			}
 
 			$term = $this->add_term( $term );
 		}
+
 		return $terms;
 	}
 
